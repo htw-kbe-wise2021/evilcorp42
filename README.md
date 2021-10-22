@@ -1,3 +1,11 @@
+# evilcorp42
+Name: Marco Heger s0563424
+Name: Nicklas Hanzig s0563654
+
+KompEntwicklung 21/22 - Übung
+
+
+
 # Komponentenbasierte Entwicklung
 
 In diesem Repository befinden sich die Belegaufgaben für den Kurs Komponentenbasierte Entwicklung an der Hochschule für Technik und Wirtschaft Berlin.
