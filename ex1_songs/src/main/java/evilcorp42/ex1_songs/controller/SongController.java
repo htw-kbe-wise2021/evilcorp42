@@ -82,20 +82,31 @@ public class SongController {
      * response zur aufgabe 6
      */
     @PostMapping(
-            consumes = "application/json"
-    )
+            consumes = "application/json")
     @ResponseBody
-    public Song createSong(@RequestBody Song newSong, HttpServletResponse response){
-        /*int newSongId = 0;
-        while (songRepository.findById(newSongId) != null){
+    public void postSong(@RequestBody Song newSong, HttpServletResponse response){
+        int newSongId = 1;
+        while (songRepository.existsById(newSongId)){
             newSongId++;
         }
-        newSong.setId(newSongId);*/
-        log.info("Song wird mit der Id: "+ newSong.getId() +"eingefuegt");
-        response.setHeader("Location", ServletUriComponentsBuilder.fromCurrentContextPath().path("/"+newSong.getId()).toUriString());
-        return songRepository.save(newSong);
+        newSong.setId(newSongId);
+        log.info("Song wird mit der Id: "+ newSong.getId() +" eingefuegt");
+        songRepository.save(newSong);
+        response.setStatus(201);
+        response.setHeader("Location", ServletUriComponentsBuilder.fromCurrentContextPath().path("/evilcorp42/songs/"+newSong.getId()).toUriString()); //URI des neuen Songs zurueckgeben/als location angeben
     }
 
-
+    /*
+     * response zur aufgabe 7
+     */
+    @DeleteMapping(
+            value="/{songId}",
+            headers = "Accept=application/json")
+    @ResponseBody
+    public ResponseEntity deleteSong(@PathVariable int songId){
+        songRepository.deleteById(songId);
+        log.info("Song mit der Id: "+ songId +" wurde geloescht");
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
 
 }
