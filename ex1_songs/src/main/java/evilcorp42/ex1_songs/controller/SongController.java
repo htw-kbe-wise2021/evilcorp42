@@ -12,10 +12,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @RestController
-@RequestMapping("/rest/songs")
+@RequestMapping("/evilcorp42/songs")
 public class SongController {
 
     //Diese Zeile dient nur für eine besser Ausgabe in der Konsole
@@ -28,7 +31,25 @@ public class SongController {
     }
 
 
-    /**
+    /*
+     * reponse zur aufgabe 4
+     */
+    @GetMapping(
+            value="/{songId}",
+            headers="Accept=application/json")
+    @ResponseBody
+    public ResponseEntity<String> getSongById(@PathVariable int songId){
+        Song song = songRepository.getById(songId);
+        String ausgabe = "";
+        ausgabe = song.toString();
+
+        HttpHeaders header = new HttpHeaders();
+        header.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(ausgabe, header, HttpStatus.OK);
+    }
+
+
+    /*
      * Funktion gibt sämtliche Songs zurueck
      */
     @GetMapping()
@@ -55,5 +76,26 @@ public class SongController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+    /*
+     * response zur aufgabe 6
+     */
+    @PostMapping(
+            consumes = "application/json"
+    )
+    @ResponseBody
+    public Song createSong(@RequestBody Song newSong, HttpServletResponse response){
+        /*int newSongId = 0;
+        while (songRepository.findById(newSongId) != null){
+            newSongId++;
+        }
+        newSong.setId(newSongId);*/
+        log.info("Song wird mit der Id: "+ newSong.getId() +"eingefuegt");
+        response.setHeader("Location", ServletUriComponentsBuilder.fromCurrentContextPath().path("/"+newSong.getId()).toUriString());
+        return songRepository.save(newSong);
+    }
+
+
 
 }
