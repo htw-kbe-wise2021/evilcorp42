@@ -7,47 +7,90 @@ import evilcorp42.ex1_songs.entity.Song;
 import evilcorp42.ex1_songs.repository.SongRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
-@RestController
+@RestController //Controller nach dem REST-Prinzip
 @RequestMapping("/evilcorp42/songs")
 public class SongController {
 
     //Diese Zeile dient nur für eine besser Ausgabe in der Konsole
     private static final Logger log = LoggerFactory.getLogger(SongController.class);
 
-    private final SongRepository songRepository; // SpringBoot-Magic
+    private final SongRepository songRepository;
 
     public SongController(SongRepository songRepository) {
-        this.songRepository = songRepository; // SpringBoot-Magic
+        this.songRepository = songRepository;
     }
-
 
     /*
      * reponse zur aufgabe 4
      */
     @GetMapping(
-            value="/{songId}",
-            headers="Accept=application/json")
+            value="/{songId_String}"
+    )
     @ResponseBody
-    public ResponseEntity<String> getSongById(@PathVariable int songId){
-        Song song = songRepository.getById(songId);
-        String ausgabe = "";
-        ausgabe = song.toString();
-
-        HttpHeaders header = new HttpHeaders();
-        header.setContentType(MediaType.APPLICATION_JSON);
-        return new ResponseEntity<>(ausgabe, header, HttpStatus.OK);
+    public ResponseEntity<String> getSongById(
+            @PathVariable String songId_String
+            ,  @RequestHeader(HttpHeaders.ACCEPT) String accept
+    ){
+        log.info("getSongById() wird ausgeführt.");
+        System.out.println("getSongById() wird ausgeführt.");
+        MediaType targetMediaType;
+        try {
+            targetMediaType = MediaType.parseMediaType(accept);
+        }
+        catch (InvalidMediaTypeException ex){
+            log.info("Mediatype des Headers konnte nicht ermittelt werden.");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        if(!targetMediaType.equals(MediaType.APPLICATION_JSON) && !targetMediaType.equals(MediaType.ALL) && !targetMediaType.equals(MediaType.APPLICATION_XML)){
+            log.info("Anfrage besitzt den falschen Accept-Typ(" + targetMediaType + ").");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        if(!this.idCheck(songId_String)){
+            log.info("Id wird nicht unterstützt.");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        int id;
+            id = Integer.parseInt(songId_String);
+            Song song;
+            try {
+                song = songRepository.getById(id);
+            }
+            catch (javax.persistence.EntityNotFoundException ex){
+                log.info("SongId(" + id + ") wurde nicht in der Datenbank gefunden.");
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            String ausgabe;
+            switch (targetMediaType.toString()) {
+                case MediaType.ALL_VALUE:
+                    ausgabe = song.toJSON();
+                    targetMediaType = MediaType.APPLICATION_JSON;
+                    break;
+                case MediaType.APPLICATION_JSON_VALUE:
+                    ausgabe = song.toJSON();
+                    break;
+                case MediaType.APPLICATION_XML_VALUE:
+                    ausgabe = song.toXML();
+                    break;
+                default:
+                    ausgabe = null;
+                    break;
+            }
+            if(ausgabe == null){
+                log.info("Song konnte nicht ins Zielformat(" + accept + ") umgewandelt werden.");
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+            log.info("Song konnte in das Zielformat(" + targetMediaType + ") erfolgreich umgewandelt werden. Hier die Ausgabe: " + System.getProperty("line.separator") + ausgabe);
+            HttpHeaders header = new HttpHeaders();
+            header.setContentType(targetMediaType);
+            return new ResponseEntity<>(ausgabe, header, HttpStatus.OK);
     }
-
 
     /*
      * Funktion gibt sämtliche Songs zurueck
@@ -76,7 +119,6 @@ public class SongController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
     /*
      * response zur aufgabe 6
@@ -109,4 +151,22 @@ public class SongController {
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
+
+    /**
+     * Funktion ermittelt ob die ID eine erlaubte Id ist
+     * @param id_String in Stringformat
+     * @return true, wenn der Wert erlaubt ist, false wenn der Wert fehlerhaft oder falsch ist
+     */
+    private boolean idCheck (String id_String){
+        try{
+            int idNumber = Integer.parseInt(id_String);
+            if(idNumber > 0){
+                return true;
+            }
+        }
+        catch (NumberFormatException ex){
+            return false;
+        }
+        return false;
+    }
 }
