@@ -1,10 +1,9 @@
-package evilcorp42.ex1_songs.configuration;
+package evilcorp42.songservice.configuration;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import evilcorp42.ex1_songs.controller.SongController;
-import evilcorp42.ex1_songs.entity.Song;
-import evilcorp42.ex1_songs.repository.SongRepository;
+import evilcorp42.songservice.entity.Song;
+import evilcorp42.songservice.repository.SongRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -15,7 +14,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
@@ -32,7 +30,7 @@ public class LoadDatabase {
 
             List<Song> sl = null;
             try{
-                Path fileName = Path.of("ex1_songs/src/main/resources/songs.json");
+                Path fileName = Path.of("ex2_songlists/src/main/resources/songs.json");
                 System.out.println("fileName: " + fileName);
                 String songString = Files.readString(fileName);
                 ObjectMapper objectMapper = new ObjectMapper();

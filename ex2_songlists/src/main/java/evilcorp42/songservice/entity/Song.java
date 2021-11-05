@@ -1,10 +1,10 @@
-package evilcorp42.ex1_songs.entity;
+package evilcorp42.songservice.entity;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import evilcorp42.ex1_songs.controller.SongController;
+import evilcorp42.songservice.controller.SongController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,12 +112,7 @@ public class Song {
         try {
             ObjectMapper mapper = new ObjectMapper();
             return mapper.readValue(json, Song.class);
-        }
-        catch (JsonMappingException e) {
-            log.info("jsonToSong() konnte folgenden String nicht in ein Song umwandeln: " + System.getProperty("line.separator") + json);
-            e.printStackTrace();
-        }
-        catch (JsonProcessingException e) {
+        } catch (JsonProcessingException e) {
             log.info("jsonToSong() konnte folgenden String nicht in ein Song umwandeln: " + System.getProperty("line.separator") + json);
             e.printStackTrace();
         }

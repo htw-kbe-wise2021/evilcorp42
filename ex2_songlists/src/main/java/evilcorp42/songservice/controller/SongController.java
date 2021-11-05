@@ -1,10 +1,10 @@
-package evilcorp42.ex1_songs.controller;
+package evilcorp42.songservice.controller;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import evilcorp42.ex1_songs.entity.Song;
-import evilcorp42.ex1_songs.repository.SongRepository;
+import evilcorp42.songservice.entity.Song;
+import evilcorp42.songservice.repository.SongRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
@@ -42,17 +42,13 @@ public class SongController {
         System.out.println("getSongById() wird ausgeführt.");
         MediaType targetMediaType;
         try {
-            targetMediaType = MediaType.parseMediaType(accept);
+            targetMediaType = checkMediatype(accept);
         }
         catch (InvalidMediaTypeException ex){
-            log.info("Mediatype des Headers konnte nicht ermittelt werden.");
+            log.info("Accept-Mediatype(" + accept + ") des Headers ist nicht erlaubt.");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        if(!targetMediaType.equals(MediaType.APPLICATION_JSON) && !targetMediaType.equals(MediaType.ALL) && !targetMediaType.equals(MediaType.APPLICATION_XML)){
-            log.info("Anfrage besitzt den falschen Accept-Typ(" + targetMediaType + ").");
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        if(!this.idCheck(songId_String)){
+        if(!this.checkSongId(songId_String)){
             log.info("Id wird nicht unterstützt.");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -68,7 +64,7 @@ public class SongController {
             }
             String ausgabe;
             switch (targetMediaType.toString()) {
-                case MediaType.ALL_VALUE:
+                case MediaType.ALL_VALUE :
                     ausgabe = song.toJSON();
                     targetMediaType = MediaType.APPLICATION_JSON;
                     break;
@@ -99,7 +95,7 @@ public class SongController {
     @ResponseBody
     public ResponseEntity<String> getAllSongs(@RequestHeader("Accept") String accept) {
         System.out.println("getAllSongs() wird ausgefuehrt.");
-
+        //TODO: Response mit XML-Liste
         List<Song> liste = songRepository.findAll();//SpringBoot-Magic
 
         try {
@@ -145,10 +141,10 @@ public class SongController {
             value="/{songId}",
             headers = "Accept=application/json")
     @ResponseBody
-    public ResponseEntity deleteSong(@PathVariable int songId){
+    public ResponseEntity<String> deleteSong(@PathVariable int songId){
         songRepository.deleteById(songId);
         log.info("Song mit der Id: "+ songId +" wurde geloescht");
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 
@@ -157,7 +153,7 @@ public class SongController {
      * @param id_String in Stringformat
      * @return true, wenn der Wert erlaubt ist, false wenn der Wert fehlerhaft oder falsch ist
      */
-    private boolean idCheck (String id_String){
+    private boolean checkSongId(String id_String){
         try{
             int idNumber = Integer.parseInt(id_String);
             if(idNumber > 0){
@@ -168,5 +164,26 @@ public class SongController {
             return false;
         }
         return false;
+    }
+
+
+    /**
+     * Funktion versucht aus einem String von einen HTTP-Accept-Header-Attribut einen erlaubten Mediatype zu ermitteln
+     * @param mt String mit eventuell mehreren Mediatypen die angefragt werden
+     * @return den vorrangig verwendeten MediaTyp oder ein NULL wenn kein Mediatype ermitteln werden konnte
+     */
+    private MediaType checkMediatype(String mt){
+        if(mt.contains(MediaType.ALL_VALUE)){
+            return MediaType.APPLICATION_JSON;
+        }
+        else if (mt.contains(MediaType.APPLICATION_JSON_VALUE)){
+            return MediaType.APPLICATION_JSON;
+        }
+        else if (mt.contains(MediaType.APPLICATION_XML_VALUE)){
+            return MediaType.APPLICATION_XML;
+        }
+        else {
+            throw new InvalidMediaTypeException("mt","Fehlerhaftes MediaType ermittelt.");
+        }
     }
 }

@@ -4,7 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/KompEntw_Ueb.iml" filepath="$PROJECT_DIR$/.idea/KompEntw_Ueb.iml" />
       <module fileurl="file://$PROJECT_DIR$/ex0_github/ex0_github.iml" filepath="$PROJECT_DIR$/ex0_github/ex0_github.iml" />
-      <module fileurl="file://$PROJECT_DIR$/ex1_songs/ex1_songs.iml" filepath="$PROJECT_DIR$/ex1_songs/ex1_songs.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ex2_songlists/ex2_songlists.iml" filepath="$PROJECT_DIR$/ex2_songlists/ex2_songlists.iml" />
     </modules>
   </component>
 </project>

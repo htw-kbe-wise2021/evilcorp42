@@ -1,13 +1,13 @@
-package evilcorp42.ex1_songs;
+package evilcorp42.songservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class Ex1SongsApplication {
+public class SongServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(Ex1SongsApplication.class, args);
+		SpringApplication.run(SongServiceApplication.class, args);
 	}
 
 }
